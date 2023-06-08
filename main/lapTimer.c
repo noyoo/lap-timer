@@ -10,14 +10,12 @@
 void state_machine(void) {
   switch (_state) {
     case INIT:
-      i2c_initialize();
       wifi_initialize();
       break;
     case MASTER_INIT:
       start_ap();
       break;
     case MASTER:
-      i2c_read();
       break;
     case SLAVE_INIT:
       break;

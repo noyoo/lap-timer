@@ -12,7 +12,6 @@
 #include "freertos/task.h"
 
 #include "lapTimer_types.h"
-#include "lapTimer_i2c.h"
 #include "lapTimer_wifi.h"
 
 extern State _state;
