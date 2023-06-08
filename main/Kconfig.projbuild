@@ -1,0 +1,10 @@
+# put here your custom config value
+menu "LAP TIMER"
+config MODULE_WIFI_SSID
+	string "SSID"
+	default "AGH Racing lap timer"
+	
+config MODULE_WIFI_PASSWORD
+	string "password"
+	default "AGHracing!"
+endmenu
