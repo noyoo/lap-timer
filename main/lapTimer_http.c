@@ -13,14 +13,20 @@ void http_server_initialize(void){
 
 	ESP_ERROR_CHECK(httpd_start(&http_server, &http_config));
 
-	httpd_uri_t homepage_uri = {
+static const httpd_uri_t root_uri = {
 		.uri = "/",
 		.method = HTTP_GET,
-		.handler = homepage_uri_handler,
-		.user_ctx = NULL,
+		.handler = root_uri_handler,
+		.user_ctx = NULL, // @suppress("Symbol is not resolved")
 	};
+
+	ESP_ERROR_CHECK(httpd_start(&http_server, &http_config));
+	ESP_ERROR_CHECK(httpd_register_uri_handler(http_server, &root_uri));
 }
 
-esp_err_t homepage_uri_handler(void){
+static esp_err_t root_uri_handler(httpd_req_t* request){
+	const char* response = "Siema from nojo";
+	httpd_resp_send(request, response, strlen(response));
 
+	return ESP_OK;
 }

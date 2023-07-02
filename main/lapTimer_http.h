@@ -10,7 +10,9 @@
 
 #include "esp_http_server.h"
 
+extern httpd_handle_t http_server;
+
 void http_server_initialize(void);
-esp_err_t homepage_uri_handler(void);
+static esp_err_t root_uri_handler(httpd_req_t*);
 
 #endif /* MAIN_LAPTIMER_HTTP_H_ */

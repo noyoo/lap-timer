@@ -5,9 +5,6 @@
 
 State _state = INIT;
 
-
-
-
 void app_main(void) {
   for(;;){
       state_machine();

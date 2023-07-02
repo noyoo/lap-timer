@@ -1,4 +1,4 @@
-/* * Data converted from C:/Users/grzes/eclipse-workspace/lap-timer/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from D:/ESP_Workspace/lapTimer/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 .section .rodata.embedded

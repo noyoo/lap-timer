@@ -4,19 +4,19 @@
 cmake_minimum_required(VERSION 3.5)
 
 file(MAKE_DIRECTORY
-  "C:/Espressif/esp-idf-v5.0.2/components/bootloader/subproject"
-  "C:/Users/grzes/eclipse-workspace/lap-timer/build/bootloader"
-  "C:/Users/grzes/eclipse-workspace/lap-timer/build/bootloader-prefix"
-  "C:/Users/grzes/eclipse-workspace/lap-timer/build/bootloader-prefix/tmp"
-  "C:/Users/grzes/eclipse-workspace/lap-timer/build/bootloader-prefix/src/bootloader-stamp"
-  "C:/Users/grzes/eclipse-workspace/lap-timer/build/bootloader-prefix/src"
-  "C:/Users/grzes/eclipse-workspace/lap-timer/build/bootloader-prefix/src/bootloader-stamp"
+  "C:/Espressif/frameworks/esp-idf-v5.0.2/components/bootloader/subproject"
+  "D:/ESP_Workspace/lapTimer/build/bootloader"
+  "D:/ESP_Workspace/lapTimer/build/bootloader-prefix"
+  "D:/ESP_Workspace/lapTimer/build/bootloader-prefix/tmp"
+  "D:/ESP_Workspace/lapTimer/build/bootloader-prefix/src/bootloader-stamp"
+  "D:/ESP_Workspace/lapTimer/build/bootloader-prefix/src"
+  "D:/ESP_Workspace/lapTimer/build/bootloader-prefix/src/bootloader-stamp"
 )
 
 set(configSubDirs )
 foreach(subDir IN LISTS configSubDirs)
-    file(MAKE_DIRECTORY "C:/Users/grzes/eclipse-workspace/lap-timer/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
+    file(MAKE_DIRECTORY "D:/ESP_Workspace/lapTimer/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
 endforeach()
 if(cfgdir)
-  file(MAKE_DIRECTORY "C:/Users/grzes/eclipse-workspace/lap-timer/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
+  file(MAKE_DIRECTORY "D:/ESP_Workspace/lapTimer/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
 endif()
