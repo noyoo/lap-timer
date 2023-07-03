@@ -8,6 +8,7 @@
 #include "lapTimer_wifi.h"
 
   uint8_t retry = 0;
+
   wifi_config_t wifi_config_ap = { .ap = { .ssid = CONFIG_MODULE_WIFI_SSID,
 		.ssid_len = strlen(CONFIG_MODULE_WIFI_SSID), .channel = 4, .password =
 				CONFIG_MODULE_WIFI_PASSWORD, .max_connection = 4, .authmode =
@@ -79,6 +80,9 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
   if (event_id == WIFI_EVENT_AP_STACONNECTED) {
           wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
       }
+  else if(event_id == WIFI_EVENT_AP_START){
+	  http_server_initialize();
+  }
   else if (event_id == WIFI_EVENT_AP_STADISCONNECTED) {
           wifi_event_ap_stadisconnected_t* event = (wifi_event_ap_stadisconnected_t*) event_data;
       }

@@ -11,8 +11,6 @@ void http_server_initialize(void){
 	httpd_handle_t http_server;
 	httpd_config_t http_config = HTTPD_DEFAULT_CONFIG();
 
-	ESP_ERROR_CHECK(httpd_start(&http_server, &http_config));
-
 static const httpd_uri_t root_uri = {
 		.uri = "/",
 		.method = HTTP_GET,
@@ -22,6 +20,7 @@ static const httpd_uri_t root_uri = {
 
 	ESP_ERROR_CHECK(httpd_start(&http_server, &http_config));
 	ESP_ERROR_CHECK(httpd_register_uri_handler(http_server, &root_uri));
+	printf("HTTP started\n");
 }
 
 static esp_err_t root_uri_handler(httpd_req_t* request){

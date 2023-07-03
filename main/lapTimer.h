@@ -12,7 +12,6 @@
 #include "freertos/task.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
-
 #include "lapTimer_types.h"
 #include "lapTimer_wifi.h"
 #include "lapTimer_http.h"
