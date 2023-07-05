@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include "lapTimer.h"
 
-State _state = INIT;
+State_t _state = INIT;
 
 void app_main(void) {
   for(;;){

@@ -23,7 +23,7 @@
 #include "lapTimer_types.h"
 #include "lapTimer_http.h"
 
-extern State _state;
+extern State_t _state;
 static const char* WIFI_TAG = "WIFI MODULE";
 extern wifi_config_t wifi_config_ap, wifi_config_sta;
 static EventGroupHandle_t wifi_event_group;

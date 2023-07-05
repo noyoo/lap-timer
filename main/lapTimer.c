@@ -14,7 +14,7 @@ void state_machine(void) {
   switch (_state) {
     case INIT:
       wifi_initialize();
-      initialize_gpio();
+      initialize_ir_sensor();
       setup_modebtn_interrupt();
       break;
     case MASTER_INIT:

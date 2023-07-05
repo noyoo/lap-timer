@@ -15,6 +15,6 @@ typedef enum {
   SLAVE_INIT,
   SLAVE,
   ERROR
-} State;
+} State_t;
 
 #endif /* MAIN_LAPTIMER_TYPES_H_ */

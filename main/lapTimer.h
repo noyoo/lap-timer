@@ -21,7 +21,7 @@
 
 #define MODE_BUTTON_GPIO_PIN GPIO_NUM_3
 
-extern State _state;
+extern State_t _state;
 extern QueueHandle_t interruptQueue;
 extern Button_t button;
 
