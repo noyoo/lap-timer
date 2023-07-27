@@ -1,8 +1,20 @@
 {
     "idf.adapterTargetName": "esp32c3",
-    "idf.portWin": "COM3",
+    "idf.portWin": "COM9",
     "idf.openOcdConfigs": [
         "board/esp32c3-builtin.cfg"
     ],
-    "idf.flashType": "UART"
+    "idf.flashType": "UART",
+    "idf.espIdfPathWin": "c:\\Espressif\\frameworks\\esp-idf-v5.0.2",
+    "files.associations": {
+        "list": "c",
+        "array": "c",
+        "string": "c",
+        "string_view": "c",
+        "ranges": "c",
+        "span": "c",
+        "vector": "c",
+        "xstring": "c",
+        "xutility": "c"
+    }
 }

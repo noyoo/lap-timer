@@ -23,22 +23,22 @@ void initialize_ir_sensor(void) {
 
 void get_ir_sensor(void) {
     // switch (_irState) {
-        // case HIGH:
-            if (!gpio_get_level(IR_SENSOR_GPIO_PIN)) {
-                int64_t snap_time = esp_timer_get_time();
-                uint8_t hours, minutes, seconds, millis;
-                millis = (snap_time / 1000) % 1000;
-                seconds = (snap_time / 1000000) % 60;
-                minutes = (snap_time / 60000000) % 60;
-                hours = (snap_time / 3600000000);
-                ESP_LOGI(IR_TAG, "IR sensor triggered! Time is %02d:%02d:%02d:%03d", hours, minutes, seconds, millis);
-                // ESP_ERROR_CHECK(esp_timer_start_once(debounceTimer, 500000));
-                // _irState = LOW;
-            }
-        //     break;
-        // case LOW:
-            
-        //     break;
+    // case HIGH:
+    if (!gpio_get_level(IR_SENSOR_GPIO_PIN)) {
+        int64_t snap_time = esp_timer_get_time();
+        uint8_t hours, minutes, seconds, millis;
+        millis = (snap_time / 1000) % 1000;
+        seconds = (snap_time / 1000000) % 60;
+        minutes = (snap_time / 60000000) % 60;
+        hours = (snap_time / 3600000000);
+        ESP_LOGI("IR_SENSOR", "IR sensor triggered! Time is %02d:%02d:%02d:%03d", hours, minutes, seconds, millis);
+        // ESP_ERROR_CHECK(esp_timer_start_once(debounceTimer, 500000));
+        // _irState = LOW;
+    }
+    //     break;
+    // case LOW:
+
+    //     break;
     // }
 
     //	if(!gpio_get_level(IR_SENSOR_GPIO_PIN)){
@@ -46,8 +46,8 @@ void get_ir_sensor(void) {
     //	}
 }
 
-void debounce_end(void) {
-	ESP_LOGI(IR_TAG, "BOINK");
-	esp_timer_stop(debounceTimer);
+void debounce_end(void*) {
+    ESP_LOGI("IR_SENSOR", "BOINK");
+    esp_timer_stop(debounceTimer);
     _irState = HIGH;
 }

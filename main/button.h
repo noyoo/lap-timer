@@ -8,30 +8,39 @@
 #ifndef MAIN_BUTTON_H_
 #define MAIN_BUTTON_H_
 
-#define BUTTON_DEBOUNCE 20
+#define BUTTON_DEBOUNCE 10
+#define BUTTON_LONGPRESS_THRESH 1000000
+#define BUTTON_NEXTPRESS_THRESH 500000
 
 #include "driver/gpio.h"
+#include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-typedef void(*callback)(void);
+typedef void (*callback)(void);
 
-typedef enum ButtonState
-{
-	Depressed,
-	Pressed_Debounce,
-	Pressed,
-	Depressed_Debounce
-}ButtonState_t;
+typedef enum ButtonState {
+    Depressed,
+    Pressed_Debounce,
+    Pressed,
+    SecondPress_Wait,
+    SecondPress_Debounce,
+    SecondPress,
+    LongPress_Wait,
+    LongPress,
+    WaitForRelease,
+    Depressed_Debounce,
+} ButtonState_t;
 
-typedef struct Button
-{
-	ButtonState_t _state;
-	ButtonState_t _lastState;
-	unsigned int _buttonPin;
-	callback _callback;
-
-}Button_t;
+typedef struct Button {
+    ButtonState_t _state;
+    ButtonState_t _lastState;
+    unsigned int _buttonPin;
+    callback _singlePressCallback;
+    callback _doublePressCallback;
+    callback _longPressCallback;
+    uint64_t _pressTime;
+} Button_t;
 
 int Button_Update(Button_t* button);
 

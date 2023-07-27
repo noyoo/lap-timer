@@ -26,7 +26,7 @@ extern QueueHandle_t interruptQueue;
 extern Button_t button;
 
 void state_machine(void);
-void setup_modebtn_interrupt(void);
+void modeButton_setup(void);
 static void IRAM_ATTR button_interrupt_handler(void*);
 void mode_button_task(void);
 void guzior(void);

@@ -3,7 +3,9 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "C:/Espressif/frameworks/esp-idf-v5.0.2/components/spi_flash/sim/stubs/log/include",
+                "C:/Espressif/frameworks/esp-idf-v5.0.2/components/driver/include"
             ],
             "defines": [
                 "_DEBUG",

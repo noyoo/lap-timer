@@ -16,7 +16,6 @@
 #include "vl53l0x_platform.h"
 
 #define VL53L0X_addr 0x52
-static const char* I2C_TAG = "I2C MODULE";
 
 extern uint8_t rxbuffer[3], txbuffer[1];
 extern VL53L0X_Dev_t sensor;
