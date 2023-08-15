@@ -1,10 +1,3 @@
-/*
- * button.h
- *
- *  Created on: 4 lip 2023
- *      Author: dvagh
- */
-
 #ifndef MAIN_BUTTON_H_
 #define MAIN_BUTTON_H_
 
@@ -20,7 +13,7 @@
 typedef void (*callback)(void);
 
 typedef enum ButtonState {
-    Depressed,
+    Released,
     Pressed_Debounce,
     Pressed,
     SecondPress_Wait,
@@ -34,8 +27,7 @@ typedef enum ButtonState {
 
 typedef struct Button {
     ButtonState_t _state;
-    ButtonState_t _lastState;
-    unsigned int _buttonPin;
+    uint8_t _buttonPin;
     callback _singlePressCallback;
     callback _doublePressCallback;
     callback _longPressCallback;

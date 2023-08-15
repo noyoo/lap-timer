@@ -1,53 +1,52 @@
-/*
- * lapTimer_ir_sensor.c
- *
- *  Created on: 1 Jul 2023
- *      Author: mirek
- */
-
 #include "lapTimer_ir_sensor.h"
 
-IR_State_t _irState = HIGH;
-esp_timer_handle_t debounceTimer;
 void initialize_ir_sensor(void) {
     ESP_ERROR_CHECK(gpio_set_direction(IR_SENSOR_GPIO_PIN, GPIO_MODE_INPUT));
-    esp_timer_create_args_t debounceTimerArgs = {
-        .callback = &debounce_end,
-        .arg = NULL,
-        .dispatch_method = ESP_TIMER_TASK,
-        .name = "debounce_timer",
-        .skip_unhandled_events = true,
-    };
-    ESP_ERROR_CHECK(esp_timer_create(&debounceTimerArgs, &debounceTimer));
 }
 
-void get_ir_sensor(void) {
-    // switch (_irState) {
-    // case HIGH:
-    if (!gpio_get_level(IR_SENSOR_GPIO_PIN)) {
-        int64_t snap_time = esp_timer_get_time();
-        uint8_t hours, minutes, seconds, millis;
-        millis = (snap_time / 1000) % 1000;
-        seconds = (snap_time / 1000000) % 60;
-        minutes = (snap_time / 60000000) % 60;
-        hours = (snap_time / 3600000000);
-        ESP_LOGI("IR_SENSOR", "IR sensor triggered! Time is %02d:%02d:%02d:%03d", hours, minutes, seconds, millis);
-        // ESP_ERROR_CHECK(esp_timer_start_once(debounceTimer, 500000));
-        // _irState = LOW;
+int64_t intercept_startTime = 0;
+
+int64_t IR_sensor_update(IR_Sensor_t* sensor) {
+    switch (sensor->_state) {
+        case Intercept:
+            sensor->_state = Armed;
+            setStatusBit(Gate1_calibrated);
+            if (!gpio_get_level(sensor->_sensorPin)) {
+                setStatusBit(Gate1_calibrating);
+                if (intercept_startTime == 0)
+                    intercept_startTime = esp_timer_get_time();
+                else if (esp_timer_get_time() > intercept_startTime + INTERCEPT_TIME) {
+                    resetStatusBit(Gate1_calibrating);
+                    setStatusBit(Gate1_calibrated);
+                    resetStatusBit(Gate1_active);
+                    sensor->_state = Armed;
+                }
+            } else {
+                intercept_startTime = 0;
+            }
+            break;
+        case Armed:
+            if (getStatusBit(Gate1_active)) {
+                sensor->_state = Active;
+            }
+            break;
+        case Active:
+            if (gpio_get_level(sensor->_sensorPin)) {
+                printf("ping\n");
+                sensor->_state = WaitForClear;
+                return esp_timer_get_time();
+            }
+            if (!getStatusBit(Gate1_active)) {
+                sensor->_state = Armed;
+            }
+
+            if (!getStatusBit(Gate1_calibrated)) {
+                sensor->_state = Intercept;
+            }
+            break;
+        case WaitForClear:
+            if (!gpio_get_level(sensor->_sensorPin)) sensor->_state = Active;
+            break;
     }
-    //     break;
-    // case LOW:
-
-    //     break;
-    // }
-
-    //	if(!gpio_get_level(IR_SENSOR_GPIO_PIN)){
-    //
-    //	}
-}
-
-void debounce_end(void*) {
-    ESP_LOGI("IR_SENSOR", "BOINK");
-    esp_timer_stop(debounceTimer);
-    _irState = HIGH;
+    return 0;
 }

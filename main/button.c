@@ -1,14 +1,7 @@
-/*
- * button.c
- *
- *  Created on: 4 lip 2023
- *      Author: dvagh
- */
 #include "button.h"
 int Button_Update(Button_t* button) {
-    button->_lastState = button->_state;
     switch (button->_state) {
-        case Depressed:
+        case Released:
             if (!gpio_get_level(button->_buttonPin)) button->_state = Pressed_Debounce;
             break;
         case Pressed_Debounce:
@@ -17,8 +10,7 @@ int Button_Update(Button_t* button) {
             button->_state = LongPress_Wait;
             break;
         case Pressed:
-            // if (button->_callback != NULL) button->_callback();
-            printf("once\n");
+            if (button->_singlePressCallback != NULL) button->_singlePressCallback();
             button->_state = WaitForRelease;
             break;
         case LongPress_Wait:
@@ -31,7 +23,7 @@ int Button_Update(Button_t* button) {
             }
             break;
         case LongPress:
-            printf("long\n");
+            if (button->_longPressCallback != NULL) button->_longPressCallback();
             button->_state = WaitForRelease;
             break;
         case WaitForRelease:
@@ -49,12 +41,12 @@ int Button_Update(Button_t* button) {
             button->_state = SecondPress;
             break;
         case SecondPress:
-            printf("twice\n");
+            if (button->_doublePressCallback != NULL) button->_doublePressCallback();
             button->_state = WaitForRelease;
             break;
         case Depressed_Debounce:
             vTaskDelay(BUTTON_DEBOUNCE);
-            button->_state = Depressed;
+            button->_state = Released;
             break;
     }
     return 1;

@@ -4,7 +4,7 @@
 
 #include "lapTimer.h"
 
-State_t _state = INIT;
+State_t _state = Init;
 
 void app_main(void) {
     for (;;) {
