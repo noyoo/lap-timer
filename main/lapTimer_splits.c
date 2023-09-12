@@ -1,8 +1,8 @@
 #include "lapTimer_splits.h"
 
 void addSplit(SplitGroup_t* splits, int64_t time) {
-    splits->_split[splits->_position] = time;
     splits->_position++;
+    splits->_split[splits->_position] = time;
 }
 
 void removeSplit(SplitGroup_t* splits, uint8_t position) {

@@ -1,64 +1,90 @@
 #include "lapTimer_status.h"
 
 uint16_t _statusBits;
+SlaveList_t slaves = {.pointer = -1};
+uint32_t deviceIP;
 
 void setStatusBit(Status_t statusBit) {
     switch (statusBit) {
-        case System_ready:
-            _statusBits = _statusBits | STATUS_SYSTEM_START_READY_SET;
+        case Gate_calibrated:
+            _statusBits = _statusBits | STATUS_CALIBRATION_MASK;
             break;
-        case System_running:
-            _statusBits = _statusBits | STATUS_SYSTEM_START_RUNNING_SET;
+        case Gate_calibrating:
+            _statusBits = _statusBits | STATUS_CALIBRATING_MASK;
             break;
-        case Gate1_calibrated:
-            _statusBits = _statusBits | STATUS_GATE1_CALIBRATION_STATUS_SET;
+        case Gate_active:
+            _statusBits = _statusBits | STATUS_ACTIVATION_MASK;
             break;
-        case Gate1_calibrating:
-            _statusBits = _statusBits | STATUS_GATE1_CALIBRATION_INPROGRESS_SET;
-            break;
-        case Gate1_active:
-            _statusBits = _statusBits | STATUS_GATE1_ACTIVATION_SET;
+        case Gate_Error:
+            _statusBits = _statusBits | STATUS_ERROR_MASK;
             break;
     }
 }
 
 void resetStatusBit(Status_t statusBit) {
     switch (statusBit) {
-        case System_ready:
-            _statusBits = _statusBits & STATUS_SYSTEM_START_READY_RESET;
+        case Gate_calibrated:
+            _statusBits = _statusBits & ~STATUS_CALIBRATION_MASK;
             break;
-        case System_running:
-            _statusBits = _statusBits & STATUS_SYSTEM_START_RUNNING_RESET;
+        case Gate_calibrating:
+            _statusBits = _statusBits & ~STATUS_CALIBRATING_MASK;
             break;
-        case Gate1_calibrated:
-            _statusBits = _statusBits & STATUS_GATE1_CALIBRATION_STATUS_RESET;
+        case Gate_active:
+            _statusBits = _statusBits & ~STATUS_ACTIVATION_MASK;
             break;
-        case Gate1_calibrating:
-            _statusBits = _statusBits & STATUS_GATE1_CALIBRATION_INPROGRESS_RESET;
-            break;
-        case Gate1_active:
-            _statusBits = _statusBits & STATUS_GATE1_ACTIVATION_RESET;
+        case Gate_Error:
+            _statusBits = _statusBits & ~STATUS_ERROR_MASK;
             break;
     }
 }
 
 bool getStatusBit(Status_t statusBit) {
     switch (statusBit) {
-        case System_ready:
-            return (_statusBits & STATUS_SYSTEM_START_READY_SET) == STATUS_SYSTEM_START_READY_SET ? true : false;
+        case Gate_calibrated:
+            return (_statusBits & STATUS_CALIBRATION_MASK) == STATUS_CALIBRATION_MASK ? true : false;
             break;
-        case System_running:
-            return (_statusBits & STATUS_SYSTEM_START_RUNNING_SET) == STATUS_SYSTEM_START_RUNNING_SET ? true : false;
+        case Gate_calibrating:
+            return (_statusBits & STATUS_CALIBRATING_MASK) == STATUS_CALIBRATING_MASK ? true : false;
             break;
-        case Gate1_calibrated:
-            return (_statusBits & STATUS_GATE1_CALIBRATION_STATUS_SET) == STATUS_GATE1_CALIBRATION_STATUS_SET ? true : false;
+        case Gate_active:
+            return (_statusBits & STATUS_ACTIVATION_MASK) == STATUS_ACTIVATION_MASK ? true : false;
             break;
-        case Gate1_calibrating:
-            return (_statusBits & STATUS_GATE1_CALIBRATION_INPROGRESS_SET) == STATUS_GATE1_CALIBRATION_INPROGRESS_SET ? true : false;
-            break;
-        case Gate1_active:
-            return (_statusBits & STATUS_GATE1_ACTIVATION_SET) == STATUS_GATE1_ACTIVATION_SET ? true : false;
+        case Gate_Error:
+            return (_statusBits & STATUS_ERROR_MASK) == STATUS_ERROR_MASK ? true : false;
             break;
     }
     return -1;
+}
+
+bool checkIfSlaveRegistered(uint32_t IP) {
+    for (int i = 0; i < slaves.pointer; i++) {
+        if (slaves.slave[i].encodedIP == IP) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void registerSlave(uint32_t IP, uint8_t status) {
+    slaves.pointer++;
+    slaves.slave[slaves.pointer].encodedIP = IP;
+    slaves.slave[slaves.pointer].status = status;
+}
+
+uint8_t getSlaveStatus(uint32_t IP) {
+    for (int i = 0; i < slaves.pointer; i++) {
+        if (slaves.slave[i].encodedIP == IP) {
+            return slaves.slave[i].status;
+        }
+    }
+    return 0;
+}
+
+void updateSlaveStatus(uint32_t IP, uint8_t status) {
+    for (int i = 0; i < slaves.pointer; i++) {
+        if (slaves.slave[i].encodedIP == IP) {
+            slaves.slave[i].status = status;
+            return;
+        }
+    }
 }

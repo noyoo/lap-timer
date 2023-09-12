@@ -16,7 +16,8 @@
         "vector": "c",
         "xstring": "c",
         "xutility": "c",
-        "laptimer_types.h": "c"
+        "laptimer_types.h": "c",
+        "freertos.h": "c"
     },
     "liveServer.settings.port": 5501
 }

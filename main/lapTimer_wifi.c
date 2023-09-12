@@ -82,8 +82,10 @@ void start_sta(void) {
                                            portMAX_DELAY);
 
     if (bits & BIT0) {  // CONNECTED
+        http_client_initialize();
+        _state = Slave;
     } else if (bits & BIT1) {  // FAILED
-
+        _state = Error;
     } else {
         ESP_LOGE("WIFI", "UNEXPECTED EVENT");
     }
@@ -100,18 +102,19 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        if (retry < 10) {
+        if (retry < 5) {
             esp_wifi_connect();
             retry++;
             ESP_LOGI("WIFI", "retry to connect to the AP");
         } else {
             xEventGroupSetBits(wifi_event_group, BIT1);
+            ESP_LOGI("WIFI", "connect to the AP fail");
         }
-        ESP_LOGI("WIFI", "connect to the AP fail");
+
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*)event_data;
         retry = 0;
+        deviceIP = event->ip_info.ip.addr;
         xEventGroupSetBits(wifi_event_group, BIT0);
-        _state = Slave;
     }
 }

@@ -13,12 +13,14 @@
 #include "lapTimer_wifi.h"
 
 #define MODE_BUTTON_GPIO_PIN GPIO_NUM_3
+#define SLAVE_POLL_DELAY_US 1000000
 
 extern State_t _state;
 extern QueueHandle_t interruptQueue;
 extern Button_t button;
 extern IR_Sensor_t IR_sensor;
 extern SplitGroup_t splits;
+extern int64_t lastSlavePollTime;
 
 void state_machine(void);
 void modeButton_setup(void);

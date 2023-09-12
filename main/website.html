@@ -161,7 +161,7 @@
                     <tr class="table-header">
                         <th>Time</th>
                         <th>Segment time</th>
-                        <th>Prev. segment loss</th>
+                        <th>Prev. segment diff.</th>
                         <th>Controls</th>
                     </tr>
                 </thead>
@@ -225,16 +225,17 @@
         }
 
         function parseSplits(splits) {
-            if(splits === null) return;
+            if (splits === null) return;
 
             start = splits[0];
             splits.forEach((split, index, array) => {
+                console.log(split, index);
                 if (index <= lastLength) return;
                 if (index === 0) return;
                 if (index === 1) {
                     el = `<tr>
-                            <td class="split-time">`+ split + `</td>
-                            <td class="segment-time">`+ (array[index - 1] - split) + `</td>
+                            <td class="split-time">`+ microsToTime(split - start) + `</td>
+                            <td class="segment-time">`+ microsToTime(split - array[index - 1]) + `</td>
                             <td class="segment-loss"></td>
                             <td>
                                 <button class="control-btn split-remove-btn">X</button>
@@ -244,9 +245,9 @@
                 }
                 if (index > 1) {
                     el = `<tr>
-                            <td class="split-time">`+ split + `</td>
-                            <td class="segment-time">`+ (array[index - 1] - split) + `</td>
-                            <td class="segment-loss">`+ ((array[index - 2] - array[index - 1]) - (array[index - 1] - split)) + `</td>
+                            <td class="split-time">`+ microsToTime(split - start) + `</td>
+                            <td class="segment-time">`+ microsToTime(split - array[index - 1]) + `</td>
+                            <td class="segment-loss">`+ microsToTime((array[index - 2] - array[index - 1]) - (array[index - 1] - split)) + `</td>
                             <td>
                                 <button class="control-btn split-remove-btn">X</button>
                             </td>
@@ -350,23 +351,24 @@
         }
 
         function updateIndicators(status) {
-            // system status
-            // 0bxxxxxx00 - locked
-            // 0bxxxxxx01 - ready
-            // 0bxxxxxx1x - running
-            // gate 1 calibration
-            // 0bxxxx00xx - not calibrated
-            // 0bxxxx01xx - calibrated
-            // 0bxxxx1xxx - calibration in progress
-            // gate 1 activation
-            // 0bxxx0xxxx - not activated
-            // 0bxxx1xxxx - activated
             color = ((status & 0b00000010) === 0b00000010) ? 'green' : ((status & 0b00000001) === 0b00000001) ? 'orange' : 'red';
             document.querySelector('.system-control>.start>.indicator').style.setProperty('--indicator-color', 'var(--indicator-' + color + ')');
             color = ((status & 0b00001000) === 0b00001000) ? 'blue' : ((status & 0b00000100) === 0b00000100) ? 'green' : 'red';; // STATUS_GATE1_CALIBRATION_INPROGRESS_MASK
             document.querySelector('.gate-control:nth-of-type(2)>.calibration>.indicator').style.setProperty('--indicator-color', 'var(--indicator-' + color + ')');
             color = ((status & 0b00010000) === 0b00010000) ? 'green' : 'red';
             document.querySelector('.gate-control>.activation>.indicator').style.setProperty('--indicator-color', 'var(--indicator-' + color + ')');
+        }
+
+        function microsToTime(micros) {
+            millis = Math.floor(micros / 1000) % 1000;
+            seconds = Math.floor(micros / 1000000) % 60;
+            minutes = Math.floor(micros / 60000000) % 60;
+            if (minutes === 0) {
+                outputString = String(seconds).padStart(2, '0') + '.' + String(millis).padStart(3, '0');
+            } else {
+                outputString = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0') + '.' + String(millis).padStart(3, '0');
+            }
+            return outputString;
         }
     </script>
 </body>

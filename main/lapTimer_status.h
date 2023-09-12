@@ -5,31 +5,41 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-// 0x00000000
-#define STATUS_SYSTEM_START_READY_SET 0b00000001
-#define STATUS_SYSTEM_START_RUNNING_SET 0b00000010
-#define STATUS_GATE1_CALIBRATION_STATUS_SET 0b00000100
-#define STATUS_GATE1_CALIBRATION_INPROGRESS_SET 0b00001000
-#define STATUS_GATE1_ACTIVATION_SET 0b00010000
 
-#define STATUS_SYSTEM_START_READY_RESET (0b00000001 ^ 0b11111111)
-#define STATUS_SYSTEM_START_RUNNING_RESET (0b00000010 ^ 0b11111111)
-#define STATUS_GATE1_CALIBRATION_STATUS_RESET (0b00000100 ^ 0b11111111)
-#define STATUS_GATE1_CALIBRATION_INPROGRESS_RESET (0b00001000 ^ 0b11111111)
-#define STATUS_GATE1_ACTIVATION_RESET (0b00010000 ^ 0b11111111)
+#define STATUS_CALIBRATION_MASK 0b00000001
+#define STATUS_CALIBRATING_MASK 0b00000010
+#define STATUS_ACTIVATION_MASK 0b00000100
+#define STATUS_ERROR_MASK 0b10000000
 
 typedef enum{
-    System_ready,
-    System_running,
-    Gate1_calibrated,
-    Gate1_calibrating,
-    Gate1_active,
+    Gate_calibrated,
+    Gate_calibrating,
+    Gate_active,
+    Gate_Error,
 } Status_t;
 
+typedef struct {
+    uint32_t encodedIP;
+    uint8_t status;
+} SlaveData_t;
+
+typedef struct {
+    SlaveData_t slave[10];
+    int8_t pointer;
+}SlaveList_t;
+
 extern uint16_t _statusBits;
+extern SlaveList_t slaves;
+extern uint32_t deviceIP;
 
 void setStatusBit(Status_t statusBit);
 void resetStatusBit(Status_t statusBit);
 bool getStatusBit (Status_t statusBit);
+
+bool checkIfSlaveRegistered(uint32_t IP);
+void registerSlave(uint32_t IP, uint8_t status);
+uint8_t getSlaveStatus(uint32_t IP);
+void updateSlaveStatus(uint32_t IP, uint8_t status);
+
 
 #endif

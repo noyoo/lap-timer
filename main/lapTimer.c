@@ -2,7 +2,10 @@
 
 Button_t button = {._buttonPin = MODE_BUTTON_GPIO_PIN, ._longPressCallback = &modeChange};
 IR_Sensor_t IR_sensor = {._sensorPin = IR_SENSOR_GPIO_PIN};
-SplitGroup_t splits = {._position = 5, ._split = {4, 5, 6, 7, 8, 9}};
+SplitGroup_t splits = {._position = -1, ._split = {}};
+bool measurmentStarted = 0;
+int64_t ret;
+int64_t lastSlavePollTime = 0;
 
 void state_machine(void) {
     switch (_state) {
@@ -13,23 +16,33 @@ void state_machine(void) {
             modeButton_setup();
             break;
         case Master_Init:
+            kill_http_client();
             esp_wifi_stop();
             start_ap();
-            setStatusBit(System_ready);
+            splits._position = -1;
+            measurmentStarted = 0;
             break;
         case Master:
-            IR_sensor_update(&IR_sensor);
+            ret = IR_sensor_update(&IR_sensor);
+            if (ret != 0 && measurmentStarted) addSplit(&splits, ret);
             Button_Update(&button);
             break;
         case Slave_Init:
-            kill_http();
+            kill_http_server();
             esp_wifi_stop();
             start_sta();
             break;
         case Slave:
+            if (esp_timer_get_time() > lastSlavePollTime + SLAVE_POLL_DELAY_US) {
+                lastSlavePollTime = esp_timer_get_time();
+                http_client_poll();
+            }
+            ret = IR_sensor_update(&IR_sensor);
+            if (ret != 0 && measurmentStarted) http_client_send_data(ret);
             Button_Update(&button);
             break;
         case Error:
+            Button_Update(&button);
             break;
     }
 }
