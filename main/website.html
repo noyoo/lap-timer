@@ -210,18 +210,20 @@
 
     <script type="text/javascript">
         let lastLength = 0;
+        let slavesRegistered = 0;
         document.querySelectorAll('button').forEach((obj) => {
             obj.addEventListener('click', buttonEventHandler);
         });
 
-        updateCycle = setInterval(getUpdate, 1000);
+        // updateCycle = setInterval(getUpdate, 1000);
 
         async function getUpdate() {
             const r = await fetch('/update');
             status = r.headers.get('System-Status');
             response = await r.json();
+            console.log(response);
             parseSplits(response.splits);
-            updateIndicators(status);
+            updateIndicators(response.gates, response.measurmentStarted);
         }
 
         function parseSplits(splits) {
@@ -229,7 +231,6 @@
 
             start = splits[0];
             splits.forEach((split, index, array) => {
-                console.log(split, index);
                 if (index <= lastLength) return;
                 if (index === 0) return;
                 if (index === 1) {
@@ -298,11 +299,11 @@
             } else if (event.target.classList.contains('export')) {
                 console.log('eksupotu');
             } else if (event.target.classList.contains('calibration')) {
-                console.log('kalibreto');
-                sendGateCalibrationCmd(1);
+                id = event.target.parentElement.children[0].innerHTML.replace("Gate ", "");
+                sendGateCalibrationCmd(id);
             } else if (event.target.classList.contains('activation')) {
-                console.log('aktiveto');
-                sendGateActivationCmd(1);
+                id = event.target.parentElement.children[0].innerHTML.replace("Gate ", "");
+                sendGateActivationCmd(id);
             }
         }
 
@@ -344,30 +345,56 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'text/html',
-                    'Command-Type': 'start-session',
-                },
-                body: 1,
+                    'Command-Type': 'start-measurment',
+                }
             });
         }
 
-        function updateIndicators(status) {
-            color = ((status & 0b00000010) === 0b00000010) ? 'green' : ((status & 0b00000001) === 0b00000001) ? 'orange' : 'red';
+        function updateIndicators(gates, measurmentStarted) {
+            color = measurmentStarted ? 'green' : 'red';
             document.querySelector('.system-control>.start>.indicator').style.setProperty('--indicator-color', 'var(--indicator-' + color + ')');
-            color = ((status & 0b00001000) === 0b00001000) ? 'blue' : ((status & 0b00000100) === 0b00000100) ? 'green' : 'red';; // STATUS_GATE1_CALIBRATION_INPROGRESS_MASK
-            document.querySelector('.gate-control:nth-of-type(2)>.calibration>.indicator').style.setProperty('--indicator-color', 'var(--indicator-' + color + ')');
-            color = ((status & 0b00010000) === 0b00010000) ? 'green' : 'red';
-            document.querySelector('.gate-control>.activation>.indicator').style.setProperty('--indicator-color', 'var(--indicator-' + color + ')');
+            gates.forEach((gateState, index, states) => {
+                if (index > slavesRegistered) {
+                    slavesRegistered = index;
+                    elementContent = `
+                            <span class="gate-id">Gate `+ (index + 1) + `</span>
+                            <button class="control-btn gate-control-btn calibration">CALIBRATE <div class="indicator"></div>
+                            </button>
+                            <button class="control-btn gate-control-btn activation">ACTIVATE<div class="indicator"></div></button>
+                        `;
+                    element = document.createElement('card');
+                    element.innerHTML = elementContent;
+                    element.classList.add('gate-control');
+                    element.addEventListener('click', buttonEventHandler);
+                    document.querySelector('.control-panel').appendChild(element);
+                }
+                switch (gateState) {
+                    case 0:
+                        document.querySelector('.gate-control:nth-of-type(' + (index + 2) + ')>.calibration>.indicator').style.setProperty('--indicator-color', 'var(--indicator-blue)');
+                        document.querySelector('.gate-control:nth-of-type(' + (index + 2) + ')>.activation>.indicator').style.setProperty('--indicator-color', 'var(--indicator-red)');
+                        break;
+                    case 1:
+                        document.querySelector('.gate-control:nth-of-type(' + (index + 2) + ')>.calibration>.indicator').style.setProperty('--indicator-color', 'var(--indicator-green)');
+                        document.querySelector('.gate-control:nth-of-type(' + (index + 2) + ')>.activation>.indicator').style.setProperty('--indicator-color', 'var(--indicator-orange)');
+                        break;
+                    default:
+                        document.querySelector('.gate-control:nth-of-type(' + (index + 2) + ')>.calibration>.indicator').style.setProperty('--indicator-color', 'var(--indicator-green)');
+                        document.querySelector('.gate-control:nth-of-type(' + (index + 2) + ')>.activation>.indicator').style.setProperty('--indicator-color', 'var(--indicator-green)');
+                        break;
+                }
+            });
         }
 
         function microsToTime(micros) {
-            millis = Math.floor(micros / 1000) % 1000;
-            seconds = Math.floor(micros / 1000000) % 60;
-            minutes = Math.floor(micros / 60000000) % 60;
+            millis = Math.abs(Math.floor(micros / 1000) % 1000);
+            seconds = Math.abs(Math.floor(micros / 1000000) % 60);
+            minutes = Math.abs(Math.floor(micros / 60000000) % 60);
             if (minutes === 0) {
                 outputString = String(seconds).padStart(2, '0') + '.' + String(millis).padStart(3, '0');
             } else {
                 outputString = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0') + '.' + String(millis).padStart(3, '0');
             }
+            if (micros < 0) outputString = '-' + outputString;
             return outputString;
         }
     </script>

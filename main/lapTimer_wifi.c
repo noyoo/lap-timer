@@ -1,10 +1,3 @@
-/*
- * lapTimer_WiFi.c
- *
- *  Created on: 31 May 2023
- *      Author: mirek
- */
-
 #include "lapTimer_wifi.h"
 
 uint8_t retry = 0;
@@ -63,13 +56,13 @@ void wifi_initialize(void) {
     _state = Master_Init;
 }
 
-void start_ap(void) {
+void wifi_start_ap(void) {
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config_ap));
     ESP_ERROR_CHECK(esp_wifi_start());
 }
 
-void start_sta(void) {
+void wifi_start_sta(void) {
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config_sta));
     ESP_ERROR_CHECK(esp_wifi_start());
@@ -82,6 +75,15 @@ void start_sta(void) {
                                            portMAX_DELAY);
 
     if (bits & BIT0) {  // CONNECTED
+        int64_t time = esp_wifi_get_tsf_time(WIFI_IF_STA);
+        if (time <= 0) {
+            _state = Error;
+            return;
+        }
+        struct timeval tv = {.tv_sec = time / 1000000, .tv_usec = time % 1000000};
+        printf("old time is: %lld\n", getSyncedTime());
+        settimeofday(&tv, NULL);
+        printf("new time is: %lld, should be %lld\n", getSyncedTime(), time);
         http_client_initialize();
         _state = Slave;
     } else if (bits & BIT1) {  // FAILED
@@ -94,6 +96,7 @@ void start_sta(void) {
 static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
     if (event_id == WIFI_EVENT_AP_STACONNECTED) {
         wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*)event_data;
+        printf("correct time is: %lld\n", esp_timer_get_time());
     } else if (event_id == WIFI_EVENT_AP_START) {
         http_server_initialize();
         _state = Master;

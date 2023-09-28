@@ -1,12 +1,12 @@
 #ifndef MAIN_LAPTIMER_H_
 #define MAIN_LAPTIMER_H_
 
-#include "button.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "freertos/freeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
+#include "lapTimer_button.h"
 #include "lapTimer_http.h"
 #include "lapTimer_ir_sensor.h"
 #include "lapTimer_types.h"

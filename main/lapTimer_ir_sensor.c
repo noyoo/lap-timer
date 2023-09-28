@@ -1,56 +1,51 @@
 #include "lapTimer_ir_sensor.h"
 
-void initialize_ir_sensor(void) {
+int64_t captureTime = 0;
+
+void IR_sensor_initialize(void) {
     ESP_ERROR_CHECK(gpio_set_direction(IR_SENSOR_GPIO_PIN, GPIO_MODE_INPUT));
 }
-
-int64_t intercept_startTime = 0;
 
 int64_t IR_sensor_update(IR_Sensor_t* sensor) {
     switch (sensor->_state) {
         case Intercept:
-            sensor->_state = Armed;
-            setStatusBit(Gate_calibrated);
-            if (!gpio_get_level(sensor->_sensorPin)) {
-                setStatusBit(Gate_calibrating);
-                if (intercept_startTime == 0)
-                    intercept_startTime = esp_timer_get_time();
-                else if (esp_timer_get_time() > intercept_startTime + INTERCEPT_TIME) {
-                    resetStatusBit(Gate_calibrating);
-                    setStatusBit(Gate_calibrated);
-                    resetStatusBit(Gate_active);
-                    sensor->_state = Armed;
-                }
-            } else {
-                intercept_startTime = 0;
+            if (gpio_get_level(sensor->_sensorPin)) {
+                captureTime = 0;
+                break;
+            }
+
+            if (captureTime == 0)
+                captureTime = esp_timer_get_time();
+
+            if (esp_timer_get_time() > captureTime + INTERCEPT_TIME_US) {
+                sensor->_state = Armed;
             }
             break;
+
         case Armed:
-            if (getStatusBit(Gate_active)) {
-                sensor->_state = Active;
-            }
-            sensor->_state = Active;
+            if (sensor->_isActive) sensor->_state = Active;
             break;
+
         case Active:
             if (gpio_get_level(sensor->_sensorPin)) {
-                printf("ping\n");
                 sensor->_state = WaitForClear;
-                intercept_startTime = esp_timer_get_time();
-                return esp_timer_get_time();
+                captureTime = esp_timer_get_time();
+                return getSyncedTime();
             }
-            // if (!getStatusBit(Gate_active)) {
-            //     sensor->_state = Armed;
-            // }
 
-            // if (!getStatusBit(Gate_calibrated)) {
-            //     sensor->_state = Intercept;
-            // }
+            if (!sensor->_isActive) sensor->_state = Armed;
             break;
+
         case WaitForClear:
-            if (esp_timer_get_time() > intercept_startTime + 10000) {
-                if (!gpio_get_level(sensor->_sensorPin)) sensor->_state = Active;
-            }
+            if ((esp_timer_get_time() > captureTime + SENSOR_BLIND_TIME_US) &&
+                (!gpio_get_level(sensor->_sensorPin))) sensor->_state = Active;
             break;
     }
     return 0;
+}
+
+int64_t getSyncedTime(void){
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (int64_t)tv.tv_sec * 1000000L + (int64_t)tv.tv_usec;
 }

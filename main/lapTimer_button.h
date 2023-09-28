@@ -1,5 +1,5 @@
-#ifndef MAIN_BUTTON_H_
-#define MAIN_BUTTON_H_
+#ifndef LAPTIMER_BUTTON_H_
+#define LAPTIMER_BUTTON_H_
 
 #define BUTTON_DEBOUNCE 10
 #define BUTTON_LONGPRESS_THRESH 1000000
@@ -34,6 +34,6 @@ typedef struct Button {
     uint64_t _pressTime;
 } Button_t;
 
-int Button_Update(Button_t* button);
+void Button_Update(Button_t* button);
 
 #endif /* MAIN_BUTTON_H_ */
