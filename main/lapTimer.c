@@ -3,6 +3,7 @@
 Button_t button = {._buttonPin = MODE_BUTTON_GPIO_PIN, ._longPressCallback = &modeChange};
 IR_Sensor_t IR_sensor = {._sensorPin = IR_SENSOR_GPIO_PIN, ._isActive = false};
 SplitGroup_t splits = {._position = -1, ._split = {}};
+LED_t LED = {._pin = GPIO_NUM_4, ._blinkFrequency = 2};
 bool measurmentStarted = 0;
 int64_t ret;
 int64_t lastSlavePollTime = 0;
@@ -13,6 +14,7 @@ void state_machine(void) {
             wifi_initialize();
             IR_sensor_initialize();
             modeButton_setup();
+            LED_setup(&LED);
             break;
 
         case Master_Init:
@@ -27,6 +29,7 @@ void state_machine(void) {
             ret = IR_sensor_update(&IR_sensor);
             if (ret != 0 && measurmentStarted) addSplit(&splits, ret);
             Button_Update(&button);
+            slaveCleanup();
             break;
 
         case Slave_Init:
@@ -49,6 +52,7 @@ void state_machine(void) {
             Button_Update(&button);
             break;
     }
+    updateLED(&LED);
 }
 
 void modeButton_setup(void) {
@@ -57,6 +61,7 @@ void modeButton_setup(void) {
 }
 
 void modeChange(void) {
+    LED_blinkNtimes(&LED, 2);
     if (_state == Master)
         _state = Slave_Init;
     else

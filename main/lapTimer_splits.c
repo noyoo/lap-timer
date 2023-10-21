@@ -11,3 +11,7 @@ void removeSplit(SplitGroup_t* splits, uint8_t position) {
     }
     splits->_position--;
 }
+
+void clearAllSplits(SplitGroup_t* splits){
+    splits->_position = -1;
+}

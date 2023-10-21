@@ -166,30 +166,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- <tr>
-                        <td>1:15.225</td>
-                        <td>1:15.225</td>
-                        <td>-0.334</td>
-                        <td>
-                            <button class="control-btn split-remove-btn">X</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>1:15.225</td>
-                        <td>1:15.225</td>
-                        <td>-0.334</td>
-                        <td>
-                            <button class="control-btn split-remove-btn">X</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>1:15.225</td>
-                        <td>1:15.225</td>
-                        <td>-0.334</td>
-                        <td>
-                            <button class="control-btn split-remove-btn">X</button>
-                        </td>
-                    </tr> -->
                 </tbody>
             </table>
         </div>
@@ -215,7 +191,7 @@
             obj.addEventListener('click', buttonEventHandler);
         });
 
-        // updateCycle = setInterval(getUpdate, 1000);
+        updateCycle = setInterval(getUpdate, 500);
 
         async function getUpdate() {
             const r = await fetch('/update');
@@ -233,15 +209,23 @@
             splits.forEach((split, index, array) => {
                 if (index <= lastLength) return;
                 if (index === 0) return;
+                firstRow = document.querySelector('.split-table>tbody>tr');
                 if (index === 1) {
+                    if (firstRow != null) return;
                     el = `<tr>
                             <td class="split-time">`+ microsToTime(split - start) + `</td>
                             <td class="segment-time">`+ microsToTime(split - array[index - 1]) + `</td>
                             <td class="segment-loss"></td>
                             <td>
                                 <button class="control-btn split-remove-btn">X</button>
-                            </td>
-                        </tr>`;
+                                </td>
+                                </tr>`;
+                    newRow = document.createElement('tr');
+                    newRow.innerHTML = el;
+                    newRow.addEventListener('click', buttonEventHandler);
+                    document.querySelector('.split-table>tbody').appendChild(newRow);
+
+                    return;
 
                 }
                 if (index > 1) {
@@ -257,11 +241,6 @@
                 newRow = document.createElement('tr');
                 newRow.innerHTML = el;
                 newRow.addEventListener('click', buttonEventHandler);
-                firstRow = document.querySelector('.split-table>tbody>tr');
-                if (firstRow === null) {
-                    document.querySelector('.split-table>tbody').appendChild(newRow);
-                    return;
-                }
                 parent = document.querySelector('.split-table>tbody>tr').parentNode;
                 parent.insertBefore(newRow, firstRow);
                 lastLength = index;
@@ -298,6 +277,7 @@
                 sendStartCommand();
             } else if (event.target.classList.contains('export')) {
                 console.log('eksupotu');
+                sendExportCommand();
             } else if (event.target.classList.contains('calibration')) {
                 id = event.target.parentElement.children[0].innerHTML.replace("Gate ", "");
                 sendGateCalibrationCmd(id);
@@ -350,6 +330,18 @@
             });
         }
 
+        async function sendExportCommand() {
+            const r = await fetch('/command', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/html',
+                    'Command-Type': 'export',
+                }
+            });
+            lastLength = 0;
+            document.querySelector('.split-table>tbody').innerHTML = '';
+        }
+
         function updateIndicators(gates, measurmentStarted) {
             color = measurmentStarted ? 'green' : 'red';
             document.querySelector('.system-control>.start>.indicator').style.setProperty('--indicator-color', 'var(--indicator-' + color + ')');
@@ -368,7 +360,7 @@
                     element.addEventListener('click', buttonEventHandler);
                     document.querySelector('.control-panel').appendChild(element);
                 }
-                switch (gateState) {
+                switch (gateState.state) {
                     case 0:
                         document.querySelector('.gate-control:nth-of-type(' + (index + 2) + ')>.calibration>.indicator').style.setProperty('--indicator-color', 'var(--indicator-blue)');
                         document.querySelector('.gate-control:nth-of-type(' + (index + 2) + ')>.activation>.indicator').style.setProperty('--indicator-color', 'var(--indicator-red)');
@@ -382,17 +374,20 @@
                         document.querySelector('.gate-control:nth-of-type(' + (index + 2) + ')>.activation>.indicator').style.setProperty('--indicator-color', 'var(--indicator-green)');
                         break;
                 }
+
+                if (gateState.isAlive === 0) document.querySelector('.gate-control:nth-of-type(' + (index + 2) + ')').style.display = 'none';
+                else document.querySelector('.gate-control:nth-of-type(' + (index + 2) + ')').style.display = 'flex';
             });
         }
 
         function microsToTime(micros) {
-            millis = Math.abs(Math.floor(micros / 1000) % 1000);
-            seconds = Math.abs(Math.floor(micros / 1000000) % 60);
-            minutes = Math.abs(Math.floor(micros / 60000000) % 60);
+            hundredths = Math.floor(Math.abs(micros / 10000) % 10000);
+            seconds = Math.floor(Math.abs(micros / 1000000) % 60);
+            minutes = Math.floor(Math.abs(micros / 60000000) % 60);
             if (minutes === 0) {
-                outputString = String(seconds).padStart(2, '0') + '.' + String(millis).padStart(3, '0');
+                outputString = String(seconds).padStart(2, '0') + '.' + String(hundredths).padStart(3, '0');
             } else {
-                outputString = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0') + '.' + String(millis).padStart(3, '0');
+                outputString = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0') + '.' + String(hundredths).padStart(2, '0');
             }
             if (micros < 0) outputString = '-' + outputString;
             return outputString;

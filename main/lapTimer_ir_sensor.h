@@ -6,6 +6,7 @@
 #include "esp_timer.h"
 #include "lapTimer_splits.h"
 #include "lapTimer_types.h"
+#include "lapTimer_led.h"
 #include "lwip/sys.h"
 
 #define INTERCEPT_TIME_US 3000000

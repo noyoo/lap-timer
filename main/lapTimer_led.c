@@ -43,7 +43,6 @@ void updateLED(LED_t* led) {
             break;
 
         case Constant:
-        printf("chuj\n");
             gpio_set_level(led->_pin, 1);
             break;
     }

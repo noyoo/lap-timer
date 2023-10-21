@@ -27,7 +27,7 @@ typedef enum ButtonState {
 
 typedef struct Button {
     ButtonState_t _state;
-    uint8_t _buttonPin;
+    gpio_num_t _buttonPin;
     callback _singlePressCallback;
     callback _doublePressCallback;
     callback _longPressCallback;

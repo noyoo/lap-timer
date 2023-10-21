@@ -35,11 +35,15 @@ typedef struct {
     uint32_t _encodedIP;
     IR_State_t _IRstate;
     uint8_t _instruction;  // 0 - do nothing, 1-activate, 2 - calibrate
+    int64_t _lastHeartbeat;
+    bool _isAlive;
 } SlaveData_t;
 
 typedef struct {
     SlaveData_t slave[10];
     int8_t pointer;
 } SlaveList_t;
+
+
 
 #endif /* MAIN_LAPTIMER_TYPES_H_ */
