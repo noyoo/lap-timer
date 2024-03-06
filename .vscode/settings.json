@@ -1,11 +1,11 @@
 {
     "idf.adapterTargetName": "esp32c3",
-    "idf.portWin": "COM9",
+    "idf.portWin": "COM4",
     "idf.openOcdConfigs": [
         "board/esp32c3-builtin.cfg"
     ],
     "idf.flashType": "UART",
-    "idf.espIdfPathWin": "c:\\Espressif\\frameworks\\esp-idf-v5.0.2",
+    "idf.espIdfPathWin": "C:\\Users\\dv_ag\\esp\\esp-idf",
     "files.associations": {
         "list": "c",
         "array": "c",
@@ -17,7 +17,9 @@
         "xstring": "c",
         "xutility": "c",
         "laptimer_types.h": "c",
-        "freertos.h": "c"
+        "freertos.h": "c",
+        "task.h": "c"
     },
-    "liveServer.settings.port": 5501
+    "liveServer.settings.port": 5501,
+    "idf.toolsPathWin": "C:\\Users\\dv_ag\\.espressif"
 }
